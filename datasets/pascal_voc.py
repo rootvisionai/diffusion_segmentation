@@ -95,11 +95,12 @@ class PascalVOC(VOCSegmentation):
         image = cv2.imread(self.images[index])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mask = cv2.imread(self.masks[index])
-        mask[np.all(mask == (192, 224, 224), axis=-1)] = (0, 0, 0)
+        mask = self._convert_to_segmentation_mask(mask)
+
         if self.transform is not None:
             transformed = self.transform(image=image, mask=mask)
             image = transformed["image"] / 255
-            mask = transformed["mask"] / 255
+            mask = transformed["mask"]
             mask = mask.permute(2, 0, 1)
         return image, mask.to(torch.float32)
 

@@ -17,12 +17,14 @@ class SEQUNET(nn.Module):
             steps=20,
             loss_function="MSELoss", # MSELoss | L1Loss
             learning_rate=0.001,
-            optimizer="AdamW"
+            optimizer="AdamW",
+            random_init_weights=torch.rand(21, 3, 1, 1)
     ):
         super().__init__()
         """
         Extracted from https://github.com/lucidrains/denoising-diffusion-pytorch/blob/main/denoising_diffusion_pytorch/denoising_diffusion_pytorch.py
         """
+        self.random_init_weights = random_init_weights
         self.steps = steps
         # if dim=64 --->
         dims = [init_dim, *map(lambda m: dim * m, dim_mults)] # ---> [64, 64,128,256,512]
@@ -141,13 +143,16 @@ class SEQUNET(nn.Module):
 
     def segmentation_training_step_partial(self, x, m):
         step_values = torch.arange(1, 0 - 1 / self.steps, -1 / self.steps)[0:-1]
+        with torch.no_grad():
+            x = F.conv2d(x, self.random_init_weights)
+            x = torch.sigmoid(x)
 
         losses = []
         for i, v in enumerate(step_values):
             if i<len(step_values)-1:
                 x_ = x*v + m*(1-v)
                 t_ = m*(1-step_values[i+1]) + x*step_values[i+1]
-                x_ = self.forward(x_) # image * 1 -> mask * 0.1 + image * 0.9
+                x_ = self.forward(x_)  # image * 1 -> mask * 0.1 + image * 0.9
                 loss = self.calculate_loss(x_, t_)
                 self.optimizer.zero_grad()
                 loss.backward()
@@ -169,6 +174,7 @@ class SEQUNET(nn.Module):
     def infer(self, x, steps=None):
         pbar = tqdm.tqdm(range(steps if steps else self.steps))
         with torch.no_grad():
+            x = F.conv2d(x, self.random_init_weights)
             for i in pbar:
                 x = self.forward(x)
                 pbar.set_description(f"INFERENCE STEP [{i}]")
@@ -178,13 +184,15 @@ class SEQUNET(nn.Module):
         ckpt_dict = torch.load(path, map_location=device)
         self.load_state_dict(ckpt_dict["model_state_dict"]) if "model_state_dict" in ckpt_dict else 0
         self.optimizer.load_state_dict(ckpt_dict["optimizer_state_dict"]) if "optimizer_state_dict" in ckpt_dict else 0
+        self.random_init_weights = ckpt_dict["random_init_weights"]
         return ckpt_dict["last_epoch"]
 
     def save_checkpoint(self, path, epoch):
         torch.save({
             "model_state_dict": self.state_dict(),
             "optimizer_state_dict": self.optimizer.state_dict(),
-            "last_epoch": epoch
+            "last_epoch": epoch,
+            "random_init_weights": self.random_init_weights
         }, path)
         return True
 

@@ -37,7 +37,7 @@ if __name__=="__main__":
 
     # get model
     model = SEQUNET(
-        input_channels=3,
+        input_channels=21,
         init_dim=64,
         dim=64,
         resnet_block_groups=8,
@@ -45,7 +45,8 @@ if __name__=="__main__":
         steps=cfg.model.steps,
         loss_function="MSELoss",  # MSELoss | L1Loss
         learning_rate=cfg.training.learning_rate,
-        optimizer="Lion"
+        optimizer="Lion",
+        random_init_weights=torch.rand(21, 3, 1, 1).to(cfg.training.device)
     )
     model.to(cfg.training.device)
     # load checkpoint if exists
@@ -82,9 +83,9 @@ if __name__=="__main__":
                 model.eval()
                 with torch.no_grad():
                     pred = model.infer(image.to(cfg.training.device), steps= cfg.model.steps).cpu()
-                torchvision.utils.save_image(pred.cpu(), f"./inference_examples/pred{i}.png")
+                pred = torch.argmax(pred, dim=1).unsqueeze(1).cpu()/21
+                torchvision.utils.save_image(pred, f"./inference_examples/pred{i}.png")
                 torchvision.utils.save_image(image.cpu(), f"./inference_examples/image{i}.png")
-                torchvision.utils.save_image(mask.cpu(), f"./inference_examples/mask{i}.png")
                 model.train()
 
             epoch_loss.append(loss)
