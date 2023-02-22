@@ -167,9 +167,11 @@ class SEQUNET(nn.Module):
         return loss
 
     def infer(self, x, steps=None):
-        for i in range(steps if steps else self.steps):
-            with torch.no_grad():
+        pbar = tqdm.tqdm(range(steps if steps else self.steps))
+        with torch.no_grad():
+            for i in pbar:
                 x = self.forward(x)
+                pbar.set_description(f"INFERENCE STEP [{i}]")
         return x
 
     def load_checkpoint(self, path, device="cuda"):
