@@ -81,7 +81,7 @@ if __name__=="__main__":
             if i % 10 == 0:
                 model.eval()
                 with torch.no_grad():
-                    pred = model.infer(image.to(cfg.training.device)).cpu()
+                    pred = model.infer(image.to(cfg.training.device), steps= cfg.model.steps).cpu()
                 torchvision.utils.save_image(pred.cpu(), f"./inference_examples/pred{i}.png")
                 torchvision.utils.save_image(image.cpu(), f"./inference_examples/image{i}.png")
                 torchvision.utils.save_image(mask.cpu(), f"./inference_examples/mask{i}.png")

@@ -95,7 +95,7 @@ class PascalVOC(VOCSegmentation):
         image = cv2.imread(self.images[index])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mask = cv2.imread(self.masks[index])
-        mask[np.all(mask == (224, 224, 192), axis=-1)] = (0, 0, 0)
+        mask[np.all(mask == (192, 224, 224), axis=-1)] = (0, 0, 0)
         if self.transform is not None:
             transformed = self.transform(image=image, mask=mask)
             image = transformed["image"] / 255

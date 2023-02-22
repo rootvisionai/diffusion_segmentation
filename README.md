@@ -4,6 +4,6 @@ Currently, in experimentation and training process.
 
 ### Output from ongoing experiment:
 
-![1](./keep/image80.png)
-![2](./keep/mask80.png)
-![3](./keep/pred80.png)
+![1](./keep/image.png)
+![2](./keep/mask.png)
+![3](./keep/pred.png)
