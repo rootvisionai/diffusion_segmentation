@@ -46,6 +46,7 @@ if __name__=="__main__":
         loss_function="MSELoss",  # MSELoss | L1Loss
         learning_rate=cfg.training.learning_rate,
         optimizer="Lion",
+        device=cfg.training.device,
         random_init_weights=torch.rand(21, 3, 1, 1).to(cfg.training.device)
     )
     model.to(cfg.training.device)

@@ -18,12 +18,14 @@ class SEQUNET(nn.Module):
             loss_function="MSELoss", # MSELoss | L1Loss
             learning_rate=0.001,
             optimizer="AdamW",
+            device="cpu",
             random_init_weights=torch.rand(21, 3, 1, 1)
     ):
         super().__init__()
         """
         Extracted from https://github.com/lucidrains/denoising-diffusion-pytorch/blob/main/denoising_diffusion_pytorch/denoising_diffusion_pytorch.py
         """
+        self.device= device
         self.random_init_weights = random_init_weights
         self.steps = steps
         # if dim=64 --->
@@ -143,9 +145,11 @@ class SEQUNET(nn.Module):
 
     def segmentation_training_step_partial(self, x, m):
         step_values = torch.arange(1, 0 - 1 / self.steps, -1 / self.steps)[0:-1]
+        step_values = step_values.to(self.device)
         with torch.no_grad():
             x = F.conv2d(x, self.random_init_weights)
-            x = torch.sigmoid(x)
+            x = torch.nn.functional.relu(x)
+            step_values *= x.max()
 
         losses = []
         for i, v in enumerate(step_values):
