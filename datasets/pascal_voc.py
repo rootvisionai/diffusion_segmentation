@@ -39,7 +39,7 @@ VOC_CLASSES = [
 ]
 
 
-VOC_COLORMAP = [
+VOC_COLORMAP_OLD = [
     [0, 0, 0],
     [128, 0, 0],
     [0, 128, 0],
@@ -63,6 +63,31 @@ VOC_COLORMAP = [
     [0, 64, 128],
 ]
 
+VOC_COLORMAP_NEW = [
+    (20, 0, 255),
+    (0, 91, 255),
+    (255, 0, 20),
+    (255, 0, 138),
+    (0, 205, 255),
+    (29, 255, 0),
+    (0, 136, 255),
+    (255, 56, 0),
+    (0, 255, 234),
+    (0, 255, 210),
+    (114, 255, 0),
+    (126, 0, 255),
+    (255, 0, 123),
+    (0, 101, 255),
+    (0, 255, 189),
+    (0, 255, 45),
+    (0, 255, 219),
+    (60, 0, 255),
+    (0, 255, 179),
+    (0, 23, 255),
+    (0, 141, 255),
+]
+
+
 
 class PascalVOC(VOCSegmentation):
     def __init__(
@@ -76,26 +101,18 @@ class PascalVOC(VOCSegmentation):
         super().__init__(root=root, image_set=image_set, download=download, transform=transform, year=year)
 
     @staticmethod
-    def _convert_to_segmentation_mask(mask):
-        # This function converts a mask from the Pascal VOC format to the format required by AutoAlbument.
-        #
-        # Pascal VOC uses an RGB image to encode the segmentation mask for that image. RGB values of a pixel
-        # encode the pixel's class.
-        #
-        # AutoAlbument requires a segmentation mask to be a NumPy array with the shape [height, width, num_classes].
-        # Each channel in this mask should encode values for a single class. Pixel in a mask channel should have
-        # a value of 1.0 if the pixel of the image belongs to this class and 0.0 otherwise.
-        height, width = mask.shape[:2]
-        segmentation_mask = np.zeros((height, width, len(VOC_COLORMAP)), dtype=np.float32)
-        for label_index, label in enumerate(VOC_COLORMAP):
-            segmentation_mask[:, :, label_index] = np.all(mask == label, axis=-1).astype(float)
-        return segmentation_mask
+    def _convert_to_new_labels(mask):
+        for i, rgb_old in enumerate(VOC_COLORMAP_OLD):
+            mask[np.all(mask == rgb_old, axis=-1)] = VOC_COLORMAP_NEW[i]
+        mask[np.all(mask == VOC_COLORMAP_NEW[0], axis=-1)] = (0, 0, 0)
+        mask[np.all(mask == (192, 224, 224), axis=-1)] = (0, 0, 0)
+        return mask
 
     def __getitem__(self, index):
         image = cv2.imread(self.images[index])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         mask = cv2.imread(self.masks[index])
-        mask[np.all(mask == (192, 224, 224), axis=-1)] = (0, 0, 0)
+        mask = self._convert_to_new_labels(mask)
         if self.transform is not None:
             transformed = self.transform(image=image, mask=mask)
             image = transformed["image"] / 255
