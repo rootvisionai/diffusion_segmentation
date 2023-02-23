@@ -14,9 +14,9 @@ Currently, in experimentation and training process.
 ## Plans & Updates
 - Made the model work, it can train and converge. Because we try to generate colors 
 to represent the classes for each pixel, it will be more difficult than usual to revert
-back the classes. This will be done later
-- The colors that are assigned to the classes are pre-defined. The color vectors have 
+back the classes. This will be done later.
+- DONE: ~~The colors that are assigned to the classes are pre-defined. The color vectors have 
 no semantic relation to the classes. This needs to change. I will define vectors (colors) 
 that are semantically related to the classes, so that model will generate more meaningful
 vectors for each pixel. This will enable the model to be used for transfer learning and few-shot
-semantic segmentation tasks. I believe that it may make the results better as well.
+semantic segmentation tasks. I believe that it may make the results better as well.~~
