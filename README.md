@@ -3,7 +3,7 @@ Use de-noising diffusion model to segment the objects on the image step by step.
 Currently, in experimentation and training process.
 - Any contribution is appreciated!
 
-[Model checkpoints to download](https://drive.google.com/drive/folders/18pPK4EkeSxQ2-VMhLBbJQ37S8FOVI4DY?usp=sharing)
+[Model checkpoints to download](https://drive.google.com/drive/folders/1IiLqW2Lc-ETAHwChz1t000FBMcMftJ4z?usp=share_link)
 
 ### Output from ongoing experiment:
 
