@@ -1,6 +1,8 @@
 from models.unet import SEQUNET
 from datasets.pascal_voc import get_transforms
 from utils import load_config
+from models.knn import KNN
+from datasets.pascal_voc import VOC_COLORMAP_NEW, VOC_CLASSES
 
 import os
 import torch
@@ -33,6 +35,9 @@ def run(cfg, path_to_images, steps=None):
         model.load_checkpoint(checkpoint_path, device=cfg.training.device)
     model.to(cfg.training.device)
 
+    # define KNN
+    pix_knn = KNN(colors=VOC_COLORMAP_NEW, classes=VOC_CLASSES)
+
     # get images
     _, transform = get_transforms(cfg.data, eval=True)
     image_paths = glob.glob(os.path.join(path_to_images, "*.jpg"))
@@ -46,11 +51,13 @@ def run(cfg, path_to_images, steps=None):
 
     model.eval()
     with torch.no_grad():
-        preds = model.infer(images.to(cfg.training.device), steps=steps if steps else cfg.model.steps).cpu()
+        preds = model.infer(images.to(cfg.training.device), steps=steps if steps else cfg.model.steps, save_intermediate=True).cpu()
+        preds_knn = pix_knn(preds.cpu())
 
     for i, path in enumerate(image_paths):
         torchvision.utils.save_image(preds[i].unsqueeze(0).cpu(), path.replace(".jpg", "_pred.jpg"))
+        torchvision.utils.save_image(preds_knn[i].unsqueeze(0).cpu(), path.replace(".jpg", "_pred_knn.jpg"))
 
 if __name__ == "__main__":
     cfg = load_config("./config.yml")
-    run(cfg=cfg, steps=50, path_to_images="test_images")
+    run(cfg=cfg, steps=30, path_to_images="test_images")

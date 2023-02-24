@@ -166,11 +166,13 @@ class SEQUNET(nn.Module):
 
         return loss
 
-    def infer(self, x, steps=None):
+    def infer(self, x, steps=None, save_intermediate=False):
         pbar = tqdm.tqdm(range(steps if steps else self.steps))
         with torch.no_grad():
             for i in pbar:
                 x = self.forward(x)
+                if save_intermediate:
+                    torchvision.utils.save_image(x, f"./test_images/int{i}.png")
                 pbar.set_description(f"INFERENCE STEP [{i}]")
         return x
 

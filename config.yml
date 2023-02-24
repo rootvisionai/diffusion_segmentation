@@ -15,18 +15,18 @@ data:
       shift_limit: 0.1
       scale_limit: 0.1
       rotate_limit: 30
-      probability: 0.2
+      probability: 0.3
 
     RGBShift:
-      r_shift_limit: 10
-      g_shift_limit: 10
-      b_shift_limit: 10
-      probability: 0.2
+      r_shift_limit: 25
+      g_shift_limit: 25
+      b_shift_limit: 25
+      probability: 0.5
 
     RandomBrightnessContrast:
-      brightness_limit: 0.2
-      contrast_limit: 0.2
-      probability: 0.2
+      brightness_limit: 0.3
+      contrast_limit: 0.3
+      probability: 0.3
 
   input_size: 128
 
